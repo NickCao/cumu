@@ -1,0 +1,10 @@
+[package]
+name = "cuda"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cuda-sys = { path = "../cuda-sys" }
+
+[lib]
+crate-type = [ "cdylib" ]
