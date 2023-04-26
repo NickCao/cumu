@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 use cuda_sys::*;
+use rand::RngCore;
 use std::{
     ffi::{CStr, CString},
     os::raw::{c_char, c_int, c_uint, c_void},
@@ -34,6 +35,8 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuDeviceGet" => cuDeviceGet as _,
         "cuDeviceGetName" => cuDeviceGetName as _,
         "cuDeviceTotalMem" => cuDeviceTotalMem_v2 as _,
+        "cuDeviceGetAttribute" => cuDeviceGetAttribute as _,
+        "cuDeviceGetUuid" => cuDeviceGetUuid_v2 as _,
         "cuArray3DCreate" => stub::<1> as _,
         "cuArray3DGetDescriptor" => stub::<2> as _,
         "cuArrayCreate" => stub::<3> as _,
@@ -65,7 +68,6 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuDestroyExternalMemory" => stub::<29> as _,
         "cuDestroyExternalSemaphore" => stub::<30> as _,
         "cuDeviceCanAccessPeer" => stub::<31> as _,
-        "cuDeviceGetAttribute" => stub::<33> as _,
         "cuDeviceGetByPCIBusId" => stub::<34> as _,
         "cuDeviceGetDefaultMemPool" => stub::<36> as _,
         "cuDeviceGetGraphMemAttribute" => stub::<37> as _,
@@ -74,7 +76,6 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuDeviceGetP2PAttribute" => stub::<41> as _,
         "cuDeviceGetPCIBusId" => stub::<42> as _,
         "cuDeviceGetTexture1DLinearMaxWidth" => stub::<43> as _,
-        "cuDeviceGetUuid" => stub::<44> as _,
         "cuDeviceGraphMemTrim" => stub::<45> as _,
         "cuDevicePrimaryCtxGetState" => stub::<46> as _,
         "cuDevicePrimaryCtxRelease" => stub::<47> as _,
@@ -400,5 +401,20 @@ pub unsafe extern "C" fn cuDeviceGetName(name: *mut c_char, len: c_int, dev: CUd
 pub unsafe extern "C" fn cuDeviceTotalMem_v2(bytes: *mut usize, dev: CUdevice) -> CUresult {
     eprintln!("cuDeviceTotalMem(dev: {})", dev);
     *bytes = 80 * 1024 * 1024 * 1024;
+    CUresult::CUDA_SUCCESS
+}
+
+pub unsafe extern "C" fn cuDeviceGetAttribute(
+    pi: *mut c_int,
+    attrib: CUdevice_attribute,
+    dev: CUdevice,
+) -> CUresult {
+    eprintln!("cuDeviceGetAttribute(dev: {}, attrib: {:?})", dev, attrib);
+    CUresult::CUDA_SUCCESS
+}
+
+pub unsafe extern "C" fn cuDeviceGetUuid_v2(uuid: *mut CUuuid, dev: CUdevice) -> CUresult {
+    eprintln!("cuDeviceGetUuid(dev: {})", dev);
+    (*uuid).bytes = rand::random();
     CUresult::CUDA_SUCCESS
 }
