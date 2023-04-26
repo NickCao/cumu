@@ -1,9 +1,15 @@
 #![allow(non_snake_case)]
 use cuda_sys::*;
 use std::{
-    ffi::CStr,
+    ffi::{CStr, CString},
     os::raw::{c_char, c_int, c_uint, c_void},
 };
+
+extern "C" fn nop() -> c_int {
+    0
+}
+
+static EXPORT: [extern "C" fn() -> c_int; 5] = [nop, nop, nop, nop, nop];
 
 #[no_mangle]
 pub unsafe extern "C" fn cuGetProcAddress_v2(
@@ -26,6 +32,8 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuModuleGetLoadingMode" => cuModuleGetLoadingMode as _,
         "cuDeviceGetCount" => cuDeviceGetCount as _,
         "cuDeviceGet" => cuDeviceGet as _,
+        "cuDeviceGetName" => cuDeviceGetName as _,
+        "cuDeviceTotalMem" => cuDeviceTotalMem_v2 as _,
         "cuArray3DCreate" => stub::<1> as _,
         "cuArray3DGetDescriptor" => stub::<2> as _,
         "cuArrayCreate" => stub::<3> as _,
@@ -62,7 +70,6 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuDeviceGetDefaultMemPool" => stub::<36> as _,
         "cuDeviceGetGraphMemAttribute" => stub::<37> as _,
         "cuDeviceGetMemPool" => stub::<38> as _,
-        "cuDeviceGetName" => stub::<39> as _,
         "cuDeviceGetNvSciSyncAttributes" => stub::<40> as _,
         "cuDeviceGetP2PAttribute" => stub::<41> as _,
         "cuDeviceGetPCIBusId" => stub::<42> as _,
@@ -76,7 +83,6 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuDevicePrimaryCtxSetFlags" => stub::<50> as _,
         "cuDeviceSetGraphMemAttribute" => stub::<51> as _,
         "cuDeviceSetMemPool" => stub::<52> as _,
-        "cuDeviceTotalMem" => stub::<53> as _,
         "cuEGLStreamConsumerAcquireFrame" => stub::<55> as _,
         "cuEGLStreamConsumerConnect" => stub::<56> as _,
         "cuEGLStreamConsumerConnectWithFlags" => stub::<57> as _,
@@ -359,11 +365,9 @@ unsafe extern "C" fn cuDriverGetVersion(version: *mut c_int) -> CUresult {
     CUresult::CUDA_SUCCESS
 }
 
-unsafe extern "C" fn cuGetExportTable(
-    ppExportTable: *mut *const c_void,
-    id: *const CUuuid,
-) -> CUresult {
+unsafe extern "C" fn cuGetExportTable(table: *mut *const c_void, id: *const CUuuid) -> CUresult {
     eprintln!("cuGetExportTable(id: {:?})", (*id).bytes);
+    *table = EXPORT.as_ptr() as _;
     CUresult::CUDA_SUCCESS
 }
 
@@ -382,5 +386,19 @@ unsafe extern "C" fn cuDeviceGetCount(count: *mut c_int) -> CUresult {
 pub unsafe extern "C" fn cuDeviceGet(device: *mut CUdevice, ordinal: c_int) -> CUresult {
     eprintln!("cuDeviceGet");
     *device = ordinal;
+    CUresult::CUDA_SUCCESS
+}
+
+pub unsafe extern "C" fn cuDeviceGetName(name: *mut c_char, len: c_int, dev: CUdevice) -> CUresult {
+    eprintln!("cuDeviceGetName(dev: {})", dev);
+    let name = std::slice::from_raw_parts_mut(name as *mut u8, len.try_into().unwrap());
+    let devname = CString::new("NVIDIA A100").unwrap();
+    name[..devname.as_bytes().len()].copy_from_slice(devname.as_bytes());
+    CUresult::CUDA_SUCCESS
+}
+
+pub unsafe extern "C" fn cuDeviceTotalMem_v2(bytes: *mut usize, dev: CUdevice) -> CUresult {
+    eprintln!("cuDeviceTotalMem(dev: {})", dev);
+    *bytes = 80 * 1024 * 1024 * 1024;
     CUresult::CUDA_SUCCESS
 }
