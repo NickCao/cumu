@@ -23,6 +23,9 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuGetProcAddress" => cuGetProcAddress_v2 as _,
         "cuDriverGetVersion" => cuDriverGetVersion as _,
         "cuGetExportTable" => cuGetExportTable as _,
+        "cuModuleGetLoadingMode" => cuModuleGetLoadingMode as _,
+        "cuDeviceGetCount" => cuDeviceGetCount as _,
+        "cuDeviceGet" => cuDeviceGet as _,
         "cuArray3DCreate" => stub::<1> as _,
         "cuArray3DGetDescriptor" => stub::<2> as _,
         "cuArrayCreate" => stub::<3> as _,
@@ -54,10 +57,8 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuDestroyExternalMemory" => stub::<29> as _,
         "cuDestroyExternalSemaphore" => stub::<30> as _,
         "cuDeviceCanAccessPeer" => stub::<31> as _,
-        "cuDeviceGet" => stub::<32> as _,
         "cuDeviceGetAttribute" => stub::<33> as _,
         "cuDeviceGetByPCIBusId" => stub::<34> as _,
-        "cuDeviceGetCount" => stub::<35> as _,
         "cuDeviceGetDefaultMemPool" => stub::<36> as _,
         "cuDeviceGetGraphMemAttribute" => stub::<37> as _,
         "cuDeviceGetMemPool" => stub::<38> as _,
@@ -278,7 +279,6 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuMipmappedArrayGetSparseProperties" => stub::<258> as _,
         "cuModuleGetFunction" => stub::<259> as _,
         "cuModuleGetGlobal" => stub::<260> as _,
-        "cuModuleGetLoadingMode" => stub::<261> as _,
         "cuModuleGetSurfRef" => stub::<262> as _,
         "cuModuleGetTexRef" => stub::<263> as _,
         "cuModuleLoad" => stub::<264> as _,
@@ -359,10 +359,28 @@ unsafe extern "C" fn cuDriverGetVersion(version: *mut c_int) -> CUresult {
     CUresult::CUDA_SUCCESS
 }
 
-pub unsafe extern "C" fn cuGetExportTable(
+unsafe extern "C" fn cuGetExportTable(
     ppExportTable: *mut *const c_void,
     id: *const CUuuid,
 ) -> CUresult {
     eprintln!("cuGetExportTable(id: {:?})", (*id).bytes);
+    CUresult::CUDA_SUCCESS
+}
+
+unsafe extern "C" fn cuModuleGetLoadingMode(mode: *mut CUmoduleLoadingMode) -> CUresult {
+    eprintln!("cuModuleGetLoadingMode");
+    *mode = CUmoduleLoadingMode::CU_MODULE_EAGER_LOADING;
+    CUresult::CUDA_SUCCESS
+}
+
+unsafe extern "C" fn cuDeviceGetCount(count: *mut c_int) -> CUresult {
+    eprintln!("cuDeviceGetCount");
+    *count = 1;
+    CUresult::CUDA_SUCCESS
+}
+
+pub unsafe extern "C" fn cuDeviceGet(device: *mut CUdevice, ordinal: c_int) -> CUresult {
+    eprintln!("cuDeviceGet");
+    *device = ordinal;
     CUresult::CUDA_SUCCESS
 }
