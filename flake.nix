@@ -14,6 +14,9 @@
       with pkgs;{
         devShells.default = mkShell {
           buildInputs = [
+            cargo
+            rustc
+            rustPlatform.bindgenHook
             cudaPackages_12.cuda_cudart
           ];
         };
