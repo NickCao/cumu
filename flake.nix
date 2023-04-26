@@ -18,6 +18,7 @@
             rustc
             rustPlatform.bindgenHook
             cudaPackages_12.cuda_cudart
+            cudaPackages_12.cuda_nvcc
           ];
         };
       });
