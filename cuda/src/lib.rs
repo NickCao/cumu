@@ -22,6 +22,7 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuInit" => cuInit as _,
         "cuGetProcAddress" => cuGetProcAddress_v2 as _,
         "cuDriverGetVersion" => cuDriverGetVersion as _,
+        "cuGetExportTable" => cuGetExportTable as _,
         "cuArray3DCreate" => stub::<1> as _,
         "cuArray3DGetDescriptor" => stub::<2> as _,
         "cuArrayCreate" => stub::<3> as _,
@@ -109,7 +110,6 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         "cuGLUnregisterBufferObject" => stub::<87> as _,
         "cuGetErrorName" => stub::<88> as _,
         "cuGetErrorString" => stub::<89> as _,
-        "cuGetExportTable" => stub::<90> as _,
         "cuGraphAddChildGraphNode" => stub::<92> as _,
         "cuGraphAddDependencies" => stub::<93> as _,
         "cuGraphAddEmptyNode" => stub::<94> as _,
@@ -356,5 +356,13 @@ unsafe extern "C" fn cuInit(_flags: c_uint) -> CUresult {
 unsafe extern "C" fn cuDriverGetVersion(version: *mut c_int) -> CUresult {
     eprintln!("cuDriverGetVersion");
     *version = 1000 * 12 + 10 * 0;
+    CUresult::CUDA_SUCCESS
+}
+
+pub unsafe extern "C" fn cuGetExportTable(
+    ppExportTable: *mut *const c_void,
+    id: *const CUuuid,
+) -> CUresult {
+    eprintln!("cuGetExportTable(id: {:?})", (*id).bytes);
     CUresult::CUDA_SUCCESS
 }
