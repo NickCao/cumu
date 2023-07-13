@@ -53,6 +53,15 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         ("cuInit", 2000, 0) => {
             *pfn = cuInit as _;
         }
+        ("cuDeviceGetCount", 2000, 0) => {
+            *pfn = cuDeviceGetCount as _;
+        }
+        ("cuDeviceGet", 2000, 0) => {
+            *pfn = cuDeviceGet as _;
+        }
+        ("cuDeviceGetName", 2000, 0) => {
+            *pfn = cuDeviceGetName as _;
+        }
         ("cuGetProcAddress", _, 0) => {
             *pfn = cuGetProcAddress_v2 as _;
         }
@@ -71,6 +80,48 @@ pub unsafe extern "C" fn cuInit(flags: c_uint) -> CUresult {
 
     let result = func(flags);
     eprintln!("cuInit(flags: {}) -> {:?}", flags, result);
+    result
+}
+
+pub unsafe extern "C" fn cuDeviceGetCount(count: *mut c_int) -> CUresult {
+    let func: libloading::Symbol<unsafe extern "C" fn(*mut c_int) -> CUresult> =
+        LIBCUDA.get(b"cuDeviceGetCount").unwrap();
+
+    let result = func(count);
+    eprintln!(
+        "cuDeviceGetCount(count: {:?}) -> {:?}",
+        count.as_ref(),
+        result
+    );
+    result
+}
+
+pub unsafe extern "C" fn cuDeviceGet(device: *mut CUdevice, ordinal: c_int) -> CUresult {
+    let func: libloading::Symbol<unsafe extern "C" fn(*mut CUdevice, c_int) -> CUresult> =
+        LIBCUDA.get(b"cuDeviceGet").unwrap();
+
+    let result = func(device, ordinal);
+    eprintln!(
+        "cuDeviceGet(device: {:?}, ordinal: {}) -> {:?}",
+        device.as_ref(),
+        ordinal,
+        result
+    );
+    result
+}
+
+pub unsafe extern "C" fn cuDeviceGetName(name: *mut c_char, len: c_int, dev: CUdevice) -> CUresult {
+    let func: libloading::Symbol<unsafe extern "C" fn(*mut c_char, c_int, CUdevice) -> CUresult> =
+        LIBCUDA.get(b"cuDeviceGetName").unwrap();
+
+    let result = func(name, len, dev);
+    eprintln!(
+        "cuDeviceGetName(name: {:?}, len: {}, dev: {}) -> {:?}",
+        CStr::from_ptr(name),
+        len,
+        dev,
+        result
+    );
     result
 }
 
