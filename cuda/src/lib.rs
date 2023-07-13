@@ -2,7 +2,7 @@
 use cuda_sys::*;
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
-use std::os::raw::{c_char, c_int, c_void};
+use std::os::raw::{c_char, c_int, c_uint, c_void};
 use std::sync::Mutex;
 
 lazy_static::lazy_static! {
@@ -50,6 +50,9 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         .insert((symbol.into(), cudaVersion, flags), *pfn as _);
 
     match (symbol.to_str().unwrap(), cudaVersion, flags) {
+        ("cuInit", 2000, 0) => {
+            *pfn = cuInit as _;
+        }
         ("cuGetProcAddress", _, 0) => {
             *pfn = cuGetProcAddress_v2 as _;
         }
@@ -60,6 +63,15 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
     }
 
     res
+}
+
+pub unsafe extern "C" fn cuInit(flags: c_uint) -> CUresult {
+    let func: libloading::Symbol<unsafe extern "C" fn(c_uint) -> CUresult> =
+        LIBCUDA.get(b"cuInit").unwrap();
+
+    let result = func(flags);
+    eprintln!("cuInit(flags: {}) -> {:?}", flags, result);
+    result
 }
 
 pub unsafe extern "C" fn cuGetExportTable(
