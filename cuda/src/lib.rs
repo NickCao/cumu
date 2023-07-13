@@ -5,7 +5,7 @@ use std::os::raw::{c_char, c_int, c_void};
 
 lazy_static::lazy_static! {
     static ref LIBCUDA: libloading::Library = unsafe {
-        libloading::Library::new("/run/opengl-driver/lib/libcuda.so.1").unwrap()
+        libloading::Library::new(std::env::var("LIBCUDA").unwrap_or("/usr/lib/libcuda.so.1".to_string())).unwrap()
     };
 }
 
@@ -17,7 +17,7 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
     flags: cuuint64_t,
     status: *mut CUdriverProcAddressQueryResult,
 ) -> CUresult {
-    let func: libloading::Symbol<
+    let lookup: libloading::Symbol<
         unsafe extern "C" fn(
             *const c_char,
             *mut *mut c_void,
@@ -26,6 +26,16 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
             *mut CUdriverProcAddressQueryResult,
         ) -> CUresult,
     > = LIBCUDA.get(b"cuGetProcAddress_v2").unwrap();
-    eprintln!("looking for symbol {:?}", CStr::from_ptr(symbol));
-    func(symbol, pfn, cudaVersion, flags, status)
+
+    let res = lookup(symbol, pfn, cudaVersion, flags, status);
+
+    eprintln!(
+        "cuGetProcAddress_v2({:?}, {}, {}) -> {:?}",
+        CStr::from_ptr(symbol),
+        cudaVersion,
+        flags,
+        res
+    );
+
+    res
 }
