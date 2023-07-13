@@ -52,6 +52,9 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         ("cuDeviceGetName", 2000, 0) => {
             *pfn = cuDeviceGetName as _;
         }
+        ("cuDeviceTotalMem", 3020, 0) => {
+            *pfn = cuDeviceTotalMem_v2 as _;
+        }
         ("cuGetProcAddress", _, 0) => {
             *pfn = cuGetProcAddress_v2 as _;
         }
@@ -72,6 +75,20 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
     }
 
     res
+}
+
+pub unsafe extern "C" fn cuDeviceTotalMem_v2(bytes: *mut usize, dev: CUdevice) -> CUresult {
+    let func: libloading::Symbol<unsafe extern "C" fn(*mut usize, CUdevice) -> CUresult> =
+        LIBCUDA.get(b"cuDeviceTotalMem_v2").unwrap();
+
+    let result = func(bytes, dev);
+    eprintln!(
+        "cuDeviceTotalMem(bytes: {:?}, dev {}) -> {:?}",
+        bytes.as_ref(),
+        dev,
+        result
+    );
+    result
 }
 
 pub unsafe extern "C" fn cuInit(flags: c_uint) -> CUresult {
