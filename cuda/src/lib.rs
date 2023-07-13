@@ -34,16 +34,6 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
 
     let symbol = CStr::from_ptr(symbol);
 
-    eprintln!(
-        "cuGetProcAddress_v2({:?}, {:?}, {}, {}, {:?}) -> {:?}",
-        symbol,
-        pfn.as_ref(),
-        cudaVersion,
-        flags,
-        status.as_ref(),
-        res
-    );
-
     TABEL
         .lock()
         .unwrap()
@@ -68,7 +58,17 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         ("cuGetExportTable", 3000, 0) => {
             *pfn = cuGetExportTable as _;
         }
-        _ => (),
+        _ => {
+            eprintln!(
+                "cuGetProcAddress_v2({:?}, {:?}, {}, {}, {:?}) -> {:?}",
+                symbol,
+                pfn.as_ref(),
+                cudaVersion,
+                flags,
+                status.as_ref(),
+                res
+            );
+        }
     }
 
     res
