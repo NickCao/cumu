@@ -29,13 +29,16 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
 
     let res = lookup(symbol, pfn, cudaVersion, flags, status);
 
+    let symbol = CStr::from_ptr(symbol);
+
     eprintln!(
         "cuGetProcAddress_v2({:?}, {}, {}) -> {:?}",
-        CStr::from_ptr(symbol),
-        cudaVersion,
-        flags,
-        res
+        symbol, cudaVersion, flags, res
     );
+
+    if symbol.to_str().unwrap() == "cuGetProcAddress" {
+        *pfn = cuGetProcAddress_v2 as _;
+    };
 
     res
 }
