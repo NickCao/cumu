@@ -1,12 +1,15 @@
 #![allow(non_snake_case)]
 use cuda_sys::*;
-use std::ffi::CStr;
+use std::collections::HashMap;
+use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
+use std::sync::Mutex;
 
 lazy_static::lazy_static! {
     static ref LIBCUDA: libloading::Library = unsafe {
         libloading::Library::new(std::env::var("LIBCUDA").unwrap_or("/usr/lib/libcuda.so.1".to_string())).unwrap()
     };
+    static ref TABEL: Mutex<HashMap<(CString, c_int, cuuint64_t), usize>> = Default::default();
 }
 
 #[no_mangle]
@@ -41,9 +44,38 @@ pub unsafe extern "C" fn cuGetProcAddress_v2(
         res
     );
 
-    if symbol.to_str().unwrap() == "cuGetProcAddress" {
-        *pfn = cuGetProcAddress_v2 as _;
-    };
+    TABEL
+        .lock()
+        .unwrap()
+        .insert((symbol.into(), cudaVersion, flags), *pfn as _);
+
+    match (symbol.to_str().unwrap(), cudaVersion, flags) {
+        ("cuGetProcAddress", _, 0) => {
+            *pfn = cuGetProcAddress_v2 as _;
+        }
+        ("cuGetExportTable", 3000, 0) => {
+            *pfn = cuGetExportTable as _;
+        }
+        _ => (),
+    }
 
     res
+}
+
+pub unsafe extern "C" fn cuGetExportTable(
+    ppExportTable: *mut *const c_void,
+    pExportTableId: *const CUuuid,
+) -> CUresult {
+    let func: libloading::Symbol<
+        unsafe extern "C" fn(*mut *const c_void, *const CUuuid) -> CUresult,
+    > = LIBCUDA.get(b"cuGetExportTable").unwrap();
+
+    let result = func(ppExportTable, pExportTableId);
+    eprintln!(
+        "cuGetExportTable(ppExportTable: {:?}, pExportTableId: {:?}) -> {:?}",
+        ppExportTable.as_ref(),
+        pExportTableId.as_ref(),
+        result
+    );
+    result
 }
