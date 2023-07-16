@@ -20,6 +20,10 @@
             cudaPackages_12.cuda_cudart
             cudaPackages_12.cuda_nvcc
           ];
+          env = {
+            LD_LIBRARY_PATH = lib.makeLibraryPath [ addOpenGLRunpath.driverLink ];
+            LIBCUDA = "${addOpenGLRunpath.driverLink}/lib/libcuda.so.1";
+          };
         };
       });
 }
