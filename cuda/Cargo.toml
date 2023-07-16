@@ -5,7 +5,10 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8.5"
+libc = "*"
 cuda-sys = { path = "../cuda-sys" }
+lazy_static = "*"
+libloading = "0.8.0"
 
 [lib]
 crate-type = [ "cdylib" ]

@@ -3,9 +3,8 @@ fn main() {
     bindgen::Builder::default()
         .header("wrapper.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        .default_enum_style(bindgen::EnumVariation::NewType {
-            is_bitfield: false,
-            is_global: false,
+        .default_enum_style(bindgen::EnumVariation::Rust {
+            non_exhaustive: false,
         })
         .allowlist_function("cu.*")
         .generate()
