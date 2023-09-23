@@ -1,11 +1,7 @@
 #![allow(non_snake_case)]
 use std::os::raw::{c_int, c_uint, c_char, c_ulonglong};
 
-<<<<<<< HEAD
 pub type CUdevice = c_uint;
-=======
-pub type CUdevice = c_uint; // 代替
->>>>>>> 1d9fa9cdb73d57785fe8516cb9527cb594a08b26
 
 // 函数作用：返回实际显卡数量
 pub unsafe extern "C" fn cuDeviceGetCount(count: *mut c_int) -> c_int {
@@ -96,35 +92,6 @@ pub unsafe extern "C" fn cuDeviceTotalMem(bytes: *mut c_ulonglong, _device: c_in
 }
 
 
-<<<<<<< HEAD
-=======
-// main 函数是程序的入口点
-// fn main() {
-//     // 调用 cuDeviceGetCount 函数获取CUDA设备数量
-//     let mut count: c_int = 0;
-//     let result = unsafe { cuDeviceGetCount(&mut count) };
-
-//     // 如果CUDA设备数量 >= 0，即没有发生错误，则将结果输出到控制台
-//     if result >= 0 {
-//         println!("Number of CUDA devices: {}", count);
-//     } else {
-//         println!("Failed to get the number of CUDA devices");
-//     }
-
-//     // 调用 cuDeviceGetAttribute 函数获取设备属性值
-//     let mut attribute: c_int = 0;
-//     let result = unsafe { cuDeviceGetAttribute(&mut attribute, 0, 0) };
-
-//     // 如果获取到的属性值 pi 为 0，说明函数成功，则将属性值结果输出到控制台
-//     if result == 0 {
-//         println!("Device attribute: {}", attribute);
-//     } else {
-//         println!("Failed to get device attribute");
-//     }
-// }
-
-
->>>>>>> 1d9fa9cdb73d57785fe8516cb9527cb594a08b26
 // tests 模块包含测试函数，测试了我们上述实现的函数的功能
 // 确保它们能够正确地返回结果，并将结果输出到控制台，格式与主函数保持一致
 #[cfg(test)]
